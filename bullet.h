@@ -6,7 +6,10 @@
 class Bullet
 {
   public:
+    float x;
+    float y;
     Bullet();
+    void destroy();
     void init(float newX, float newY, float newXVel, float newYVel);
     bool isInUse();
     void update();
@@ -15,8 +18,6 @@ class Bullet
     static const int winHeight;
     bool inUse;
     const GLuint shape;
-    float x;
-    float y;
     float xVel;
     float yVel;
 };

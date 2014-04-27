@@ -1,16 +1,20 @@
 #include <iostream>
 #include <math.h>
 #include <GL/glut.h>
+#include <GL/freeglut.h>
 
 #include "asteroid.h"
+#include "asteroid_pool.h"
 #include "bullet.h"
 #include "bullet_pool.h"
 #include "ship.h"
 
 GLsizei winWidth = 800, winHeight = 600;   
+int asteroidCreated = 0;
 
 Ship* ship;
 BulletPool* bulletPool;
+AsteroidPool* asteroidPool;
 
 // Initialize method
 void init()
@@ -20,9 +24,35 @@ void init()
 
   ship = new Ship(winWidth / 2, winHeight / 2);
   bulletPool = new BulletPool();
+  asteroidPool = new AsteroidPool();
 
   // Black background
   glClearColor(0.0, 0.0, 0.0, 0.0);
+
+}
+
+void checkCollisions()
+{
+  for (int i = 0; i < BulletPool::POOL_SIZE; i++) {
+    Bullet* b = bulletPool->bullets[i];
+    if (!b->isInUse()) {
+      continue;
+    } else {
+      for (int i = 0; i < AsteroidPool::POOL_SIZE; i++) {
+        Asteroid* a = asteroidPool->asteroids[i];
+        if (!a->isInUse()) {
+          continue;
+        } else {
+          float x1 = b->x, x2 = a->x, y1 = b->y, y2 = a->y;
+          float distance = sqrt(pow(x2 - x1, 2) + pow(y2 - y1, 2));
+          if (distance <= a->radius) {
+            a->destroy();
+            b->destroy();
+          }
+        }
+      }
+    }
+  }
 }
 
 // Draw method
@@ -30,9 +60,18 @@ void displayFcn()
 {
   // Clear display window.
   glClear(GL_COLOR_BUFFER_BIT);  
+
+  glColor3f(1, 1, 1);
+  glRasterPos2i(0, 10);
+  glutBitmapString(
+      GLUT_BITMAP_TIMES_ROMAN_24, 
+      (const unsigned char*)"Use arrow keys to rotate.  Use spacebar to fire."
+      );
   
+  checkCollisions();
   ship->update();
   bulletPool->update();
+  asteroidPool->update();
 
   glutSwapBuffers();
 
@@ -52,6 +91,13 @@ void winReshapeFcn(GLint newWidth, GLint newHeight)
 
 void animate(void)
 {
+  asteroidCreated += 1;
+  if (asteroidCreated > 100) {
+    if (1 + (rand() % 100) > 65) {
+      asteroidPool->create();
+      asteroidCreated = 0;
+    }
+  }
   glutPostRedisplay();
 }
 

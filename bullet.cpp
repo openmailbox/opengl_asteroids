@@ -3,7 +3,7 @@
 const int Bullet::winWidth = 800;
 const int Bullet::winHeight = 600;
 
-Bullet::Bullet() : inUse(false), shape(glGenLists(1)), x(0), y(0), xVel(0), yVel(0)
+Bullet::Bullet() : x(0), y(0), inUse(false), shape(glGenLists(1)), xVel(0), yVel(0)
 {
   glNewList(shape, GL_COMPILE);
   glColor3f(1, 1, 1);
@@ -18,6 +18,11 @@ Bullet::Bullet() : inUse(false), shape(glGenLists(1)), x(0), y(0), xVel(0), yVel
   glVertex2i(3, 3);
   glEnd();
   glEndList();
+}
+
+void Bullet::destroy()
+{
+  inUse = false;
 }
 
 void Bullet::init(float newX, float newY, float newXVel, float newYVel)

@@ -6,12 +6,11 @@
 class BulletPool
 {
   public:
+    static const int POOL_SIZE = 50;
+    Bullet* bullets[POOL_SIZE];
     BulletPool();
     void create(int x, int y, float xVel, float yVel);
     void update();
-  private:
-    static const int POOL_SIZE = 50;
-    Bullet* bullets[POOL_SIZE];
 };
 
 #endif

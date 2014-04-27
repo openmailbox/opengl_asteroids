@@ -1,4 +1,4 @@
-OBJS = main.cpp ship.cpp bullet.cpp bullet_pool.cpp asteroid.cpp asteroid_pool.cpp
+OBJS = main.cpp ship.o bullet.o bullet_pool.o asteroid.o asteroid_pool.o
 LIBS = -lGL -lGLU -lglut
 CC = g++ 
 DEBUG = -g

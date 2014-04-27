@@ -2,96 +2,15 @@
 #include <math.h>
 #include <GL/glut.h>
 
-GLsizei winWidth = 1280, winHeight = 1024;   
-GLint xpos = 0, ypos = 0;
+#include "asteroid.h"
+#include "bullet.h"
+#include "bullet_pool.h"
+#include "ship.h"
 
-class Ship
-{
-  public:
-    Ship(int originX, int originY) : rotationDegrees(0), shape(glGenLists(1)), x(originX), y(originY)
-    {
-      glNewList(shape, GL_COMPILE);
-      glColor3f(1, 1, 1);
-      glBegin(GL_LINES);
-      glVertex2i(x - 15, y - 10);
-      glVertex2i(x, y + 25);
-      glVertex2i(x, y + 25);
-      glVertex2i(x + 15, y - 10);
-      glVertex2i(x + 15, y);
-      glVertex2i(x - 15, y);
-      glEnd();
-      glEndList();
-    }
-    void rotate(int degreeOffset)
-    {
-      rotationDegrees += degreeOffset;
-    }
-    int getRotation()
-    {
-      return rotationDegrees;
-    }
-    void update()
-    {
-      glPushMatrix();
-      glTranslated(x, y, 0);
-      glRotated(rotationDegrees, 0, 0, 1);
-      glTranslated(-1 * x, -1 * y, 0);
-      glCallList(shape);
-      glPopMatrix();
-    }
-  private:
-    int rotationDegrees;
-    const GLuint shape;
-    int x;
-    int y;
-};
+GLsizei winWidth = 800, winHeight = 600;   
 
-class Bullet
-{
-  public:
-    float x;
-    float y;
-    float vectorX;
-    float vectorY;
-    Bullet(float vectorX, float vectorY): x(winWidth / 2), y(winHeight / 2), vectorX(vectorX), vectorY(vectorY), shape(glGenLists(1))
-    {
-      glNewList(shape, GL_COMPILE);
-      glColor3f(1, 1, 1);
-      glBegin(GL_POINTS);
-      glVertex2i(0, 0);
-      glVertex2i(0, 1);
-      glVertex2i(0, 2);
-      glVertex2i(0, 3);
-      glVertex2i(1, 0);
-      glVertex2i(1, 1);
-      glVertex2i(1, 2);
-      glVertex2i(1, 3);
-      glVertex2i(2, 0);
-      glVertex2i(2, 1);
-      glVertex2i(2, 2);
-      glVertex2i(2, 3);
-      glVertex2i(3, 0);
-      glVertex2i(3, 1);
-      glVertex2i(3, 2);
-      glVertex2i(3, 3);
-      glEnd();
-      glEndList();
-    }
-    void update()
-    {
-      x += vectorX;
-      y += vectorY;
-      glPushMatrix();
-      glTranslatef(x, y, 0);
-      glCallList(shape);
-      glPopMatrix();
-    }
-  private:
-    const GLuint shape;
-};
-
-Bullet* bullet;
 Ship* ship;
+BulletPool* bulletPool;
 
 // Initialize method
 void init()
@@ -100,7 +19,7 @@ void init()
   std::cout << "Your OpenGL version is " << glGetString(GL_VERSION) << std::endl;
 
   ship = new Ship(winWidth / 2, winHeight / 2);
-  bullet = new Bullet(1, 0);
+  bulletPool = new BulletPool();
 
   // Black background
   glClearColor(0.0, 0.0, 0.0, 0.0);
@@ -113,8 +32,7 @@ void displayFcn()
   glClear(GL_COLOR_BUFFER_BIT);  
   
   ship->update();
-
-  bullet->update();
+  bulletPool->update();
 
   glutSwapBuffers();
 
@@ -153,11 +71,8 @@ void keyboard(unsigned char key, int x, int y)
 {
   switch (key) {
     case (char)32:
-      bullet->x = winWidth / 2;
-      bullet->y = winHeight / 2;
       float radians = ((ship->getRotation() + 90) * 3.14159) / 180;
-      bullet->vectorX = cos(radians);
-      bullet->vectorY = sin(radians);
+      bulletPool->create(winWidth / 2, winHeight / 2, cos(radians) * 3, sin(radians) * 3);
       break;
   }
 }
